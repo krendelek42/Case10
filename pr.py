@@ -1,4 +1,6 @@
 import random as r
+from math import ceil
+
 refueling_information = open('azs.txt', encoding='utf-8')
 clients_information = open('input.txt', encoding='utf-8')
 price_gas = {'АИ-80':50, 'АИ-92':44, 'АИ-95':47, 'АИ-98':58}
