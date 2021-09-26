@@ -1,5 +1,6 @@
-import random as r
+from random import randint
 from math import ceil
+
 
 refueling_information = open('azs.txt', encoding='utf-8')
 clients_information = open('input.txt', encoding='utf-8')
@@ -21,6 +22,7 @@ for line in refueling_information:
     gas_inf[number] = max_line, petrol
 print(gas_inf)
 
+
 client_inf = []
 for line in clients_information:
     all_inf = list(map(str, line[:-1].split(' ')))
@@ -31,25 +33,20 @@ for line in clients_information:
     client_inf.append(inf)
 print(client_inf)
 
-def client_got_in_line(time, amount_of_gas, mark_of_gas, number, refueling_time):
-    print('В', time, 'новый клиент: ',time, mark_of_gas, amount_of_gas, refueling_time ,'встал в очередь к автомату №', number)
 
-def client_refueled(time, amount_of_gas, mark_of_gas, refueling_time):
-    new_time = list(map(int, time.split(':')))
-    hours = int(new_time[0])
-    minutes = (new_time[1])
-    new_minutes = minutes + refueling_time
-    new_hours = hours
-    if new_minutes >= 60:
-        new_hours = hours + 1
-        new_minutes = 0
-    if new_hours < 10:
-        new_new_hours = '0' + str(new_hours)
-    if new_minutes < 10:
-        new_new_minutes = '0' + str(new_minutes)
-    new_new_time = new_new_hours + ':' + new_new_minutes
-    print('В', new_new_time, 'клиент',  time, mark_of_gas, amount_of_gas, refueling_time,  'заправил свой автомобиль и покинул АЗС.')
+def client_got_in_line(time, amount_of_gas, mark_of_gas, number):
+    refueling_time = servise_time(amount_of_gas)
+    return 'В ' + time + ' новый клиент:  ' + time + ' ' + mark_of_gas + ' ' + str(amount_of_gas) + ' ' + \
+           str(refueling_time) + ' встал в очередь к автомату №' + number
 
+    
+def client_refueled(time, amount_of_gas, mark_of_gas):
+    refueling_time = servise_time(amount_of_gas)
+    new_time = add_time(time, refueling_time)
+    return 'В ' + new_time + ' клиент ' + time + ' ' + mark_of_gas + ' ' + str(amount_of_gas) + ' ' + \
+           str(refueling_time) + ' заправил свой автомобиль и покинул АЗС.'
+
+    
 number_azs = gas_inf.keys()
 azs_client = dict.fromkeys(number_azs, 0)
 def azs_inf(gas_inf, mark_of_gas, azs_client):
@@ -84,17 +81,42 @@ def azs_inf(gas_inf, mark_of_gas, azs_client):
         if gas_inf[all_avt[0]][0] >= all_avt[0] + 1:
             return all_avt[0]
 
+        
 def get_key(d, value):
     for k, v in d.items():
         if v == value:
             return k
+
+        
+def servise_time(gas_volume):
+    t = randint(9, 11)
+    if int(gas_volume) % 10:
+        time = ceil(int(gas_volume) / t)
+    else:
+        time = ceil(ceil(int(gas_volume) / 10) * 10 / t)
+    return time
+
+
+def add_time(time, refueling_time):
+    new_time = list(map(int, time.split(':')))
+    minute = new_time[1] + refueling_time
+    hour = new_time[0]
+    while minute > 59:
+        hour += 1
+        minute -= 60
+    if minute < 10:
+        minute = '0' + str(minute)
+    if hour < 10:
+        hour = '0' + str(hour)
+    return str(hour) + ':' + str(minute)
+
 
 for client in client_inf:
     time = client[0]
     amount_of_gas = client[1]
     mark_of_gas = client[2]
     hours, minutes = list(map(int, time.split(':')))
-    refueling_time = r.choice(t)*amount_of_gas
+    refueling_time = servise_time(amount_of_gas)
     min_o = azs_inf(gas_inf, mark_of_gas, azs_client)
     num = azs_client[min_o]
     num += 1
