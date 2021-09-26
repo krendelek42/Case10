@@ -1,10 +1,15 @@
+# Dokukina K.A. 65%
+# Ignatovich D.M. 50%
+# Kozlova L.A. 40%
+
+
 import random as r
 from math import ceil
 refueling_information = open('azs.txt', encoding='utf-8')
 clients_information = open('input.txt', encoding='utf-8')
 price_gas = {'АИ-80':50, 'АИ-92':44, 'АИ-95':47, 'АИ-98':58}
-gas_inf = {} # тут будет храниться вся инфа про азс
-'''Это читаем инфу про азс'''
+gas_inf = {}
+
 for line in refueling_information:
     all_inf = list(map(str, line[:-1].split(' ')))
     number = int(all_inf[0])
@@ -18,8 +23,7 @@ for line in refueling_information:
     else:
         petrol = all_inf[0]
     gas_inf[number] = max_line, petrol
-print(gas_inf)
-'''это читаем инфу про клиентов'''
+
 client_inf = []
 for line in clients_information:
     all_inf = list(map(str, line[:-1].split(' ')))
@@ -28,26 +32,47 @@ for line in clients_information:
     mark_of_gas = all_inf[2]
     inf = [time, amount_of_gas, mark_of_gas]
     client_inf.append(inf)
-print(client_inf)
+
 
 def client_got_in_line(time, amount_of_gas, mark_of_gas, number):
-    '''просто текст что клиент встал в очередь'''
+    '''A function that displays the text that the client has entered the queue
+    :param time: car arrival time.
+    :param amount_of_gas: fuel quantity
+    :param mark_of_gas: mark of petrol
+    :param number: machine number
+    :return: text
+    '''
     refueling_time = refuel_time(amount_of_gas)
     return 'В ' + str(time) + ' новый клиент:  ' + str(time) + ' ' + str(mark_of_gas) + ' ' + str(amount_of_gas) + ' ' + \
            str(refueling_time) + ' встал в очередь к автомату №' + str(number)
 
 def client_refueled(time, amount_of_gas, mark_of_gas):
-    '''просто текст когда клиент уехал'''
+    '''
+    A function that displays the text that the customer has refueled his car.
+    :param time: car arrival time.
+    :param amount_of_gas: fuel quantity
+    :param mark_of_gas: mark of petrol
+    :return: text
+    '''
     refueling_time = refuel_time(amount_of_gas)
     new_time = add_time(time, refueling_time)
     return 'В ' + new_time + ' клиент ' + time + ' ' + mark_of_gas + ' ' + str(amount_of_gas) + ' ' + \
            str(refueling_time) + ' заправил свой автомобиль и покинул АЗС.'
 
-number_azs = gas_inf.keys() # тут номера заправок
-azs_client = dict.fromkeys(number_azs, 0) # тут отслеживается очередб по заправкам
+number_azs = gas_inf.keys()
+azs_client = dict.fromkeys(number_azs, 0)
 
 def azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time):
-    ''' тут добавляется очередь к заправкам, если заято - клиент уезжает'''
+    '''
+    A function that calculates the queue of machines.
+    :param gas_inf: information about machines
+    :param mark_of_gas: mark of petrol
+    :param azs_client: information about the queue at the machines
+    :param time: car arrival time.
+    :param amount_of_gas: fuel quantity
+    :param refueling_time: car refueling time
+    :return: text that the car did not have time to refuel or the number of the machine
+    '''
     all_avt = []
     all_ochered = []
     for i in gas_inf:
@@ -86,15 +111,32 @@ def azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_tim
              return client_left_azs(time, mark_of_gas, amount_of_gas, refueling_time)
 
 def get_key(d, value):
-    ''' просто функция которая вытаскивает ключ из словаря по значению'''
+    '''
+    Helper function that retrieves a key from a dictionary by value.
+    :param d: dictionary
+    :param value: value
+    :return: key
+    '''
     for k, v in d.items():
         if v == value:
             return k
 def client_left_azs(time, mark_of_gas, amount_of_gas, refueling_time):
+    '''
+    A function that issues a test that the customer was unable to refuel the vehicle.
+    :param time: car arrival time
+    :param mark_of_gas: mark of petrol
+    :param amount_of_gas: fuel quantity
+    :param refueling_time: car refueling time
+    :return: text
+    '''
     print('В', time,  'новый клиент:',time, mark_of_gas, amount_of_gas, refueling_time, 'не смог заправить автомобиль и покинул АЗС.')
 
 def refuel_time(amount_of_gas):
-    ''' высчитывает сколько времени на заправку нужно'''
+    '''
+    A function that calculates how long it will take to refuel the vehicle.
+    :param amount_of_gas: fuel quantity
+    :return: car refueling time
+    '''
     t = r.choice([9,10, 11])
     if int(amount_of_gas) % 10:
         time = ceil(int(amount_of_gas) / t)
@@ -104,7 +146,12 @@ def refuel_time(amount_of_gas):
 
 
 def azs_avt(gas_inf, azs_client):
-    '''инфа про атвоматы и очереди в них'''
+    '''
+    A function that displays data about vending machines at a gas station.
+    :param gas_inf: information about machines
+    :param azs_client: information about the queue at the machines
+    :return: text about machine
+    '''
     for i in gas_inf:
         max_ochered = gas_inf[i][0]
         mark_gas = gas_inf[i][1]
@@ -124,7 +171,12 @@ def azs_avt(gas_inf, azs_client):
 
 
 def add_time(time, refueling_time):
-    ''' функция высчитывает во сколько клиент закончит заправляться'''
+    '''
+    A function that calculates the time when the customer will finish refueling.
+    :param time: car arrival time
+    :param refueling_time: car refueling time
+    :return: new time
+    '''
     new_time = list(map(int, time.split(':')))
     minute = new_time[1] + refueling_time
     hour = new_time[0]
@@ -143,9 +195,9 @@ fueled = {0}
 for i in range(235):
     unrefueled.add(i)
 old_time = '00:00'
-i = 0 #номер клиента в общем списке
-a = [] #список клиентов, которые уезжают в данный момент
-f = [] #список клиентов на заправке
+i = 0
+a = []
+f = []
 while old_time[:2] < '24':
     time = client_inf[i][0]
     benz = client_inf[i][1]
@@ -201,7 +253,7 @@ for key in fuel:
     sum += fuel[key]*price_gas[key]
 print("общая сумма продаж:", sum)
 q = set()
-q = fueled.difference(unrefueled) # используя метод difference
+q = fueled.difference(unrefueled)
 a = set()
 if q == a:
     print("количество незаправившихся:",0)
