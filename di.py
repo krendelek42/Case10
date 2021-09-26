@@ -137,12 +137,20 @@ def add_time(time, refueling_time):
         hour = '0' + str(hour)
     return str(hour) + ':' + str(minute)
 
+fuel = {'АИ-92': 0, 'АИ-80': 0, 'АИ-95': 0, 'АИ-98': 0}
+unrefueled = set()
+fueled = {0}
+for i in range(235):
+    unrefueled.add(i)
 old_time = '00:00'
 i = 0 #номер клиента в общем списке
 a = [] #список клиентов, которые уезжают в данный момент
 f = [] #список клиентов на заправке
 while old_time[:2] < '24':
     time = client_inf[i][0]
+    benz = client_inf[i][1]
+    ai = client_inf[i][2]
+    number_of_fueled =i
     amount_of_gas = client_inf[i][1]
     mark_of_gas = client_inf[i][2]
     hours, minutes = list(map(int, time.split(':')))
@@ -162,7 +170,11 @@ while old_time[:2] < '24':
     elif f:
         for j in f:
             if str(j[3]) == old_time:
+                fueled.add(number_of_fueled)
                 print(client_refueled(j[0], j[1], j[2]))
+                benz = client_inf[i][1]
+                ai = client_inf[i][2]
+                fuel[ai]+= benz
                 azs_client[j[5]] -= 1
                 a.append(j)
                 azs_avt(gas_inf, azs_client)
@@ -183,3 +195,15 @@ while old_time[:2] < '24':
             azs_avt(gas_inf, azs_client)
 
     old_time = add_time(old_time, 1)
+print('Количество литров проданное за сутки ', fuel)
+sum = 0
+for key in fuel:
+    sum += fuel[key]*price_gas[key]
+print("общая сумма продаж:", sum)
+q = set()
+q = fueled.difference(unrefueled) # используя метод difference
+a = set()
+if q == a:
+    print("количество незаправившихся:",0)
+else:
+    print("количество незаправившихся:", q)
