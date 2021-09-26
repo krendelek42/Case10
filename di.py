@@ -224,8 +224,8 @@ while old_time[:2] < '24':
             if str(j[3]) == old_time:
                 fueled.add(number_of_fueled)
                 print(client_refueled(j[0], j[1], j[2]))
-                benz = client_inf[i][1]
-                ai = client_inf[i][2]
+                benz = j[1]
+                ai = j[2]
                 fuel[ai]+= benz
                 azs_client[j[5]] -= 1
                 a.append(j)
