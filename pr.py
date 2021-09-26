@@ -152,18 +152,18 @@ for client in client_inf:
         num += 1
         azs_client[min_avt] = num
         if old_time != '' and ((int(old_time[:2]) > int(time[:2])) or (int(old_time[3:]) > int(time[3:]))):
-            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt)
+            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
             azs_avt(gas_inf, azs_client)
-            client_refueled(time, amount_of_gas, mark_of_gas)
+            print(client_refueled(time, amount_of_gas, mark_of_gas))
             old_time = time
         elif old_time == '':
-            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt)
+            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
             azs_avt(gas_inf, azs_client)
-            client_refueled(time, amount_of_gas, mark_of_gas)
+            print(client_refueled(time, amount_of_gas, mark_of_gas))
             old_time = time
         else:
-            client_refueled(time, amount_of_gas, mark_of_gas)
-            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt)
+            print(client_refueled(time, amount_of_gas, mark_of_gas))
+            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
             azs_avt(gas_inf, azs_client)
             old_time = time
 
