@@ -1,4 +1,5 @@
 import random as r
+from math import ceil
 refueling_information = open('azs.txt', encoding='utf-8')
 clients_information = open('input.txt', encoding='utf-8')
 price_gas = {'АИ-80':50, 'АИ-92':44, 'АИ-95':47, 'АИ-98':58}
@@ -29,33 +30,22 @@ for line in clients_information:
     client_inf.append(inf)
 print(client_inf)
 
-def client_got_in_line(time, amount_of_gas, mark_of_gas, number, refueling_time):
+def client_got_in_line(time, amount_of_gas, mark_of_gas, number):
     '''просто текст что клиент встал в очередь'''
-    print('В', time, 'новый клиент: ',time, mark_of_gas, amount_of_gas, refueling_time ,'встал в очередь к автомату №', number)
+    refueling_time = refuel_time(amount_of_gas)
+    return 'В ' + str(time) + ' новый клиент:  ' + str(time) + ' ' + str(mark_of_gas) + ' ' + str(amount_of_gas) + ' ' + \
+           str(refueling_time) + ' встал в очередь к автомату №' + str(number)
 
-def client_refueled(time, amount_of_gas, mark_of_gas, refueling_time):
+def client_refueled(time, amount_of_gas, mark_of_gas):
     '''просто текст когда клиент уехал'''
-    new_time = list(map(int, time.split(':')))
-    hours = int(new_time[0])
-    minutes = (new_time[1])
-    new_minutes = minutes + refueling_time
-    new_hours = hours
-    if new_minutes >= 60:
-        new_hours = hours + 1
-        new_minutes = 0
-    if new_hours < 10:
-        new_new_hours = '0' + str(new_hours)
-    else:
-        new_new_hours = str(new_hours)
-    if new_minutes < 10:
-        new_new_minutes = '0' + str(new_minutes)
-    else:
-        new_new_minutes = str(new_minutes)
-    new_new_time = new_new_hours + ':' + new_new_minutes
-    print('В', new_new_time, 'клиент',  time, mark_of_gas, amount_of_gas, refueling_time,  'заправил свой автомобиль и покинул АЗС.')
+    refueling_time = refuel_time(amount_of_gas)
+    new_time = add_time(time, refueling_time)
+    return 'В ' + new_time + ' клиент ' + time + ' ' + mark_of_gas + ' ' + str(amount_of_gas) + ' ' + \
+           str(refueling_time) + ' заправил свой автомобиль и покинул АЗС.'
 
 number_azs = gas_inf.keys() # тут номера заправок
 azs_client = dict.fromkeys(number_azs, 0) # тут отслеживается очередб по заправкам
+
 def azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time):
     ''' тут добавляется очередь к заправкам, если заято - клиент уезжает'''
     all_avt = []
@@ -105,12 +95,12 @@ def client_left_azs(time, mark_of_gas, amount_of_gas, refueling_time):
 
 def refuel_time(amount_of_gas):
     ''' высчитывает сколько времени на заправку нужно'''
-    min_refueling = r.choice([1,2])
-    if amount_of_gas%10 == 0:
-        refueling_time = min_refueling*(amount_of_gas//10)
+    t = r.choice([9,10, 11])
+    if int(amount_of_gas) % 10:
+        time = ceil(int(amount_of_gas) / t)
     else:
-        refueling_time = min_refueling*((amount_of_gas//10) + 1)
-    return refueling_time
+        time = ceil(ceil(int(amount_of_gas) / 10) * 10 / t)
+    return time
 
 
 def azs_avt(gas_inf, azs_client):
@@ -133,26 +123,19 @@ def azs_avt(gas_inf, azs_client):
                       '*' * line_in_azs)
 
 
-def time_of_old_client(time, refueling_time):
+def add_time(time, refueling_time):
     ''' функция высчитывает во сколько клиент закончит заправляться'''
     new_time = list(map(int, time.split(':')))
-    hours = int(new_time[0])
-    minutes = (new_time[1])
-    new_minutes = minutes + refueling_time
-    new_hours = hours
-    if new_minutes >= 60:
-        new_hours = hours + 1
-        new_minutes = 0
-    if new_hours < 10:
-        new_new_hours = '0' + str(new_hours)
-    else:
-        new_new_hours = str(new_hours)
-    if new_minutes < 10:
-        new_new_minutes = '0' + str(new_minutes)
-    else:
-        new_new_minutes = str(new_minutes)
-    new_new_time = new_new_hours + ':' + new_new_minutes
-    return new_new_time
+    minute = new_time[1] + refueling_time
+    hour = new_time[0]
+    while minute > 59:
+        hour += 1
+        minute -= 60
+    if minute < 10:
+        minute = '0' + str(minute)
+    if hour < 10:
+        hour = '0' + str(hour)
+    return str(hour) + ':' + str(minute)
 ''' тут пыталась чтобы все по времени нормально выводилось'''
 old_time = ''
 for client in client_inf:
@@ -161,7 +144,7 @@ for client in client_inf:
     mark_of_gas = client[2]
     hours, minutes = list(map(int, time.split(':')))
     refueling_time = refuel_time(amount_of_gas)
-    finish_time = time_of_old_client(time, refueling_time)
+    finish_time = add_time(time, refueling_time)
 
     if isinstance(azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time), int) == True:
         min_avt = azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time)
@@ -169,18 +152,18 @@ for client in client_inf:
         num += 1
         azs_client[min_avt] = num
         if old_time != '' and ((int(old_time[:2]) > int(time[:2])) or (int(old_time[3:]) > int(time[3:]))):
-            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt, refueling_time)
+            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt)
             azs_avt(gas_inf, azs_client)
-            client_refueled(time, amount_of_gas, mark_of_gas, refueling_time)
+            client_refueled(time, amount_of_gas, mark_of_gas)
             old_time = time
         elif old_time == '':
-            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt, refueling_time)
+            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt)
             azs_avt(gas_inf, azs_client)
-            client_refueled(time, amount_of_gas, mark_of_gas, refueling_time)
+            client_refueled(time, amount_of_gas, mark_of_gas)
             old_time = time
         else:
-            client_refueled(time, amount_of_gas, mark_of_gas, refueling_time)
-            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt, refueling_time)
+            client_refueled(time, amount_of_gas, mark_of_gas)
+            client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt)
             azs_avt(gas_inf, azs_client)
             old_time = time
 
