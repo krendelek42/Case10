@@ -136,41 +136,74 @@ def add_time(time, refueling_time):
     if hour < 10:
         hour = '0' + str(hour)
     return str(hour) + ':' + str(minute)
-''' тут пыталась чтобы все по времени нормально выводилось'''
-old_time = ''
-for client in client_inf:
-    time = client[0]
-    amount_of_gas = client[1]
-    mark_of_gas = client[2]
+
+fuel = {'АИ-92': 0, 'АИ-80': 0, 'АИ-95': 0, 'АИ-98': 0}
+unrefueled = set()
+fueled = {0}
+for i in range(235):
+    unrefueled.add(i)
+old_time = '00:00'
+i = 0 #номер клиента в общем списке
+a = [] #список клиентов, которые уезжают в данный момент
+f = [] #список клиентов на заправке
+while old_time[:2] < '24':
+    time = client_inf[i][0]
+    benz = client_inf[i][1]
+    ai = client_inf[i][2]
+    number_of_fueled =i
+    amount_of_gas = client_inf[i][1]
+    mark_of_gas = client_inf[i][2]
     hours, minutes = list(map(int, time.split(':')))
     refueling_time = refuel_time(amount_of_gas)
     finish_time = add_time(time, refueling_time)
-
-    if isinstance(azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time), int) == True:
+    x = [time, amount_of_gas, mark_of_gas, finish_time, refueling_time]
+    if old_time == '00:00':
         min_avt = azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time)
         num = azs_client[min_avt]
         num += 1
         azs_client[min_avt] = num
-        if old_time != '' and ((int(old_time[:2]) > int(time[:2])) or (int(old_time[3:]) > int(time[3:]))):
-            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
-            azs_avt(gas_inf, azs_client)
-            print(client_refueled(time, amount_of_gas, mark_of_gas))
-            old_time = time
-        elif old_time == '':
-            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
-            azs_avt(gas_inf, azs_client)
-            print(client_refueled(time, amount_of_gas, mark_of_gas))
-            old_time = time
-        else:
-            print(client_refueled(time, amount_of_gas, mark_of_gas))
-            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
-            azs_avt(gas_inf, azs_client)
-            old_time = time
-
-    else:
-        azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time)
+        print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
+        i += 1
+        x.append(min_avt)
+        f.append(x)
         azs_avt(gas_inf, azs_client)
+    elif f:
+        for j in f:
+            if str(j[3]) == old_time:
+                fueled.add(number_of_fueled)
+                print(client_refueled(j[0], j[1], j[2]))
+                benz = client_inf[i][1]
+                ai = client_inf[i][2]
+                fuel[ai]+= benz
+                azs_client[j[5]] -= 1
+                a.append(j)
+                azs_avt(gas_inf, azs_client)
+        if a:
+            for j in a:
+                a.remove(j)
+                f.remove(j)
+    if (old_time == time) and (old_time != '00:00'):
+        if isinstance(azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time), int) == True:
+            min_avt = azs_inf(gas_inf, mark_of_gas, azs_client, time, amount_of_gas, refueling_time)
+            num = azs_client[min_avt]
+            num += 1
+            azs_client[min_avt] = num
+            print(client_got_in_line(time, amount_of_gas, mark_of_gas, min_avt))
+            i += 1
+            x.append(min_avt)
+            f.append(x)
+            azs_avt(gas_inf, azs_client)
 
-
-
-
+    old_time = add_time(old_time, 1)
+print('Количество литров проданное за сутки ', fuel)
+sum = 0
+for key in fuel:
+    sum += fuel[key]*price_gas[key]
+print("общая сумма продаж:", sum)
+q = set()
+q = fueled.difference(unrefueled) # используя метод difference
+a = set()
+if q == a:
+    print("количество незаправившихся:",0)
+else:
+    print("количество незаправившихся:", q)
